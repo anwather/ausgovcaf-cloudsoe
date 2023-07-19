@@ -46,7 +46,7 @@
     "variables": {
         "workspaceResourceGroup": "[split(parameters('workspaceResourceId'),'/')[4]]",
         "automationAccountResourceGroup": "[split(parameters('automationAccountResourceId'),'/')[4]]"
-        
+
     },
     "resources": [
         {
@@ -64,10 +64,10 @@
                 "CloudSOELaSolutionDeployment"
             ],
             "properties": {
-              "pricingTier": "Standard"
+                "pricingTier": "Standard"
             }
-          },
-          {
+        },
+        {
             //Turn on Log Analytics agent autodeployment
             "name": "default",
             "type": "Microsoft.Security/autoProvisioningSettings",
@@ -205,27 +205,6 @@
                         "value": "[reference('CloudSOELaSolutionDeployment').outputs.dataCollectionRuleResourceIds.value]"
                     },
                     "workspaceResourceId": {
-                        "value": "[parameters('workspaceResourceId')]"
-                    }
-                }
-            }
-        },
-        {
-            "type": "Microsoft.Resources/deployments",
-            "apiVersion": "2019-05-01",
-            "name": "CloudSOEWorkbookDeployment",
-            "resourceGroup": "[variables('workspaceResourceGroup')]",
-            "properties": {
-                "mode": "Incremental",
-                "templateLink": {
-                    "contentVersion": "1.0.0.0",
-                    "uri": "[uri(deployment().properties.templateLink.uri, 'arm-cloudsoe-workbook.json')]"
-                },
-                "parameters": {
-                    "defaultSubscriptionId": {
-                        "value": "[subscription().subscriptionId]"
-                    },
-                    "defaultWorkspaceResourceId": {
                         "value": "[parameters('workspaceResourceId')]"
                     }
                 }
