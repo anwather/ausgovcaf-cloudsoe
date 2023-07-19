@@ -1,0 +1,272 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "policyName": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Authorization/policyDefinitions",
+      "name": "[parameters('policyName')]",
+      "apiVersion": "2019-09-01",
+      "properties": {
+        "displayName": "GC - Windows logon Banner",
+        "policyType": "Custom",
+        "mode": "All",
+        "description": "Audit if the Windows logon banner complies with the specified banner text and title.",
+        "metadata": {
+          "category": "Guest Configuration",
+          "guestConfiguration": {
+            "name": "WindowsLogonBanner",
+            "version": "1.0.0",
+            "contentType": "Custom",
+            "contentUri": "https://ausgovcafassets01.blob.core.windows.net/guest-configuration/WindowsLogonBanner.zip?sv=2022-11-02&st=2023-07-19T04%3A23%3A44Z&se=2026-07-19T04%3A23%3A44Z&sr=b&sp=rl&sig=aaV4OnW%2B1Tw8cpFoza7GoZBKC%2FczqQdjqSlhn3h38ak%3D",
+            "contentHash": "74C6864159FE2FAF08ED590EDFFCE69A110C7F41CD60BD49A2E7278ED015B8BF",
+            "configurationParameter": {
+              "BannerTitle": "[SecurityOption]Ensure Windows logon banner title is set correctly;Interactive_logon_Message_title_for_users_attempting_to_log_on",
+              "BannerText": "[SecurityOption]Ensure Windows logon banner text is set correctly;Interactive_logon_Message_text_for_users_attempting_to_log_on"
+            }
+          }
+        },
+        "parameters": {
+          "BannerTitle": {
+            "defaultValue": "YOUR LOGON BANNER TITLE HERE",
+            "type": "string",
+            "metadata": {
+              "displayName": "Windows logon banner title",
+              "description": "Windows logon banner title"
+            }
+          },
+          "BannerText": {
+            "defaultValue": "YOUR LOGON BANNER TEXT HERE",
+            "type": "string",
+            "metadata": {
+              "displayName": "Windows logon banner text",
+              "description": "Windows logon banner text"
+            }
+          },
+          "IncludeArcMachines": {
+            "type": "string",
+            "metadata": {
+              "displayName": "Include Arc connected servers",
+              "description": "By selecting this option, you agree to be charged monthly per Arc connected machine."
+            },
+            "allowedValues": [
+              "True",
+              "False"
+            ],
+            "defaultValue": "False"
+          }
+        },
+        "policyRule": {
+          "if": {
+            "anyOf": [
+              {
+                "allOf": [
+                  {
+                    "field": "type",
+                    "equals": "Microsoft.Compute/virtualMachines"
+                  },
+                  {
+                    "anyOf": [
+                      {
+                        "field": "Microsoft.Compute/imagePublisher",
+                        "in": [
+                          "esri",
+                          "incredibuild",
+                          "MicrosoftDynamicsAX",
+                          "MicrosoftSharepoint",
+                          "MicrosoftVisualStudio",
+                          "MicrosoftWindowsDesktop",
+                          "MicrosoftWindowsServerHPCPack"
+                        ]
+                      },
+                      {
+                        "allOf": [
+                          {
+                            "field": "Microsoft.Compute/imagePublisher",
+                            "equals": "MicrosoftWindowsServer"
+                          },
+                          {
+                            "field": "Microsoft.Compute/imageSKU",
+                            "notLike": "2008*"
+                          }
+                        ]
+                      },
+                      {
+                        "allOf": [
+                          {
+                            "field": "Microsoft.Compute/imagePublisher",
+                            "equals": "MicrosoftSQLServer"
+                          },
+                          {
+                            "field": "Microsoft.Compute/imageOffer",
+                            "notLike": "SQL2008*"
+                          }
+                        ]
+                      },
+                      {
+                        "allOf": [
+                          {
+                            "field": "Microsoft.Compute/imagePublisher",
+                            "equals": "microsoft-dsvm"
+                          },
+                          {
+                            "field": "Microsoft.Compute/imageOffer",
+                            "equals": "dsvm-windows"
+                          }
+                        ]
+                      },
+                      {
+                        "allOf": [
+                          {
+                            "field": "Microsoft.Compute/imagePublisher",
+                            "equals": "microsoft-ads"
+                          },
+                          {
+                            "field": "Microsoft.Compute/imageOffer",
+                            "in": [
+                              "standard-data-science-vm",
+                              "windows-data-science-vm"
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "allOf": [
+                          {
+                            "field": "Microsoft.Compute/imagePublisher",
+                            "equals": "batch"
+                          },
+                          {
+                            "field": "Microsoft.Compute/imageOffer",
+                            "equals": "rendering-windows2016"
+                          }
+                        ]
+                      },
+                      {
+                        "allOf": [
+                          {
+                            "field": "Microsoft.Compute/imagePublisher",
+                            "equals": "center-for-internet-security-inc"
+                          },
+                          {
+                            "field": "Microsoft.Compute/imageOffer",
+                            "like": "cis-windows-server-201*"
+                          }
+                        ]
+                      },
+                      {
+                        "allOf": [
+                          {
+                            "field": "Microsoft.Compute/imagePublisher",
+                            "equals": "pivotal"
+                          },
+                          {
+                            "field": "Microsoft.Compute/imageOffer",
+                            "like": "bosh-windows-server*"
+                          }
+                        ]
+                      },
+                      {
+                        "allOf": [
+                          {
+                            "field": "Microsoft.Compute/imagePublisher",
+                            "equals": "cloud-infrastructure-services"
+                          },
+                          {
+                            "field": "Microsoft.Compute/imageOffer",
+                            "like": "ad*"
+                          }
+                        ]
+                      },
+                      {
+                        "allOf": [
+                          {
+                            "anyOf": [
+                              {
+                                "field": "Microsoft.Compute/virtualMachines/osProfile.windowsConfiguration",
+                                "exists": "true"
+                              },
+                              {
+                                "field": "Microsoft.Compute/virtualMachines/storageProfile.osDisk.osType",
+                                "like": "Windows*"
+                              }
+                            ]
+                          },
+                          {
+                            "anyOf": [
+                              {
+                                "field": "Microsoft.Compute/imageSKU",
+                                "exists": "false"
+                              },
+                              {
+                                "allOf": [
+                                  {
+                                    "field": "Microsoft.Compute/imageSKU",
+                                    "notLike": "2008*"
+                                  },
+                                  {
+                                    "field": "Microsoft.Compute/imageOffer",
+                                    "notLike": "SQL2008*"
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "value": "[[parameters('IncludeArcMachines')]",
+                    "equals": "true"
+                  },
+                  {
+                    "field": "type",
+                    "equals": "Microsoft.HybridCompute/machines"
+                  },
+                  {
+                    "field": "Microsoft.HybridCompute/imageOffer",
+                    "like": "windows*"
+                  }
+                ]
+              }
+            ]
+          },
+          "then": {
+            "effect": "auditIfNotExists",
+            "details": {
+              "type": "Microsoft.GuestConfiguration/guestConfigurationAssignments",
+              "name": "WindowsLogonBanner",
+              "existenceCondition": {
+                "allOf": [
+                  {
+                    "field": "Microsoft.GuestConfiguration/guestConfigurationAssignments/complianceStatus",
+                    "equals": "Compliant"
+                  },
+                  {
+                    "field": "Microsoft.GuestConfiguration/guestConfigurationAssignments/parameterHash",
+                    "equals": "[[base64(concat('[SecurityOption]Ensure Windows logon banner title is set correctly;Interactive_logon_Message_title_for_users_attempting_to_log_on', '=', parameters('BannerTitle'), ',', '[SecurityOption]Ensure Windows logon banner text is set correctly;Interactive_logon_Message_text_for_users_attempting_to_log_on', '=', parameters('BannerText')))]"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "outputs": {
+    "policyDefinitionId": {
+      "value": "[resourceId('Microsoft.Authorization/policyDefinitions',parameters('policyName'))]",
+      "type": "string"
+    }
+  }
+}

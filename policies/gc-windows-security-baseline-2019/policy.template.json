@@ -1,0 +1,253 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "policyName": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Authorization/policyDefinitions",
+      "name": "[parameters('policyName')]",
+      "apiVersion": "2019-09-01",
+      "properties": {
+        "displayName": "GC - Windows Server 2019 Baseline",
+        "policyType": "Custom",
+        "mode": "All",
+        "description": "Windows Server 2019 Baseline converted from SCT GPO.",
+        "metadata": {
+          "category": "Guest Configuration",
+          "guestConfiguration": {
+            "name": "WindowsServer2019Baseline",
+            "version": "1.0.0",
+            "contentType": "Custom",
+            "contentUri": "https://ausgovcafassets01.blob.core.windows.net/guest-configuration/WindowsServer2019Baseline.zip?sv=2022-11-02&st=2023-07-19T04%3A24%3A31Z&se=2026-07-19T04%3A24%3A31Z&sr=b&sp=rl&sig=a4onGoHxiRnZsqqKM2C3PKt7pkziBlsQqYHb1LYHyR4%3D",
+            "contentHash": "3196E908E23111A94BCB53CCEE43066841B991169420D86109B632771870FA27",
+            "configurationParameter": {}
+          }
+        },
+        "parameters": {
+          "IncludeArcMachines": {
+            "type": "string",
+            "metadata": {
+              "displayName": "Include Arc connected servers",
+              "description": "By selecting this option, you agree to be charged monthly per Arc connected machine."
+            },
+            "allowedValues": [
+              "True",
+              "False"
+            ],
+            "defaultValue": "False"
+          }
+        },
+        "policyRule": {
+          "if": {
+            "anyOf": [
+              {
+                "allOf": [
+                  {
+                    "field": "type",
+                    "equals": "Microsoft.Compute/virtualMachines"
+                  },
+                  {
+                    "anyOf": [
+                      {
+                        "field": "Microsoft.Compute/imagePublisher",
+                        "in": [
+                          "esri",
+                          "incredibuild",
+                          "MicrosoftDynamicsAX",
+                          "MicrosoftSharepoint",
+                          "MicrosoftVisualStudio",
+                          "MicrosoftWindowsDesktop",
+                          "MicrosoftWindowsServerHPCPack"
+                        ]
+                      },
+                      {
+                        "allOf": [
+                          {
+                            "field": "Microsoft.Compute/imagePublisher",
+                            "equals": "MicrosoftWindowsServer"
+                          },
+                          {
+                            "field": "Microsoft.Compute/imageSKU",
+                            "notLike": "2008*"
+                          }
+                        ]
+                      },
+                      {
+                        "allOf": [
+                          {
+                            "field": "Microsoft.Compute/imagePublisher",
+                            "equals": "MicrosoftSQLServer"
+                          },
+                          {
+                            "field": "Microsoft.Compute/imageOffer",
+                            "notLike": "SQL2008*"
+                          }
+                        ]
+                      },
+                      {
+                        "allOf": [
+                          {
+                            "field": "Microsoft.Compute/imagePublisher",
+                            "equals": "microsoft-dsvm"
+                          },
+                          {
+                            "field": "Microsoft.Compute/imageOffer",
+                            "equals": "dsvm-windows"
+                          }
+                        ]
+                      },
+                      {
+                        "allOf": [
+                          {
+                            "field": "Microsoft.Compute/imagePublisher",
+                            "equals": "microsoft-ads"
+                          },
+                          {
+                            "field": "Microsoft.Compute/imageOffer",
+                            "in": [
+                              "standard-data-science-vm",
+                              "windows-data-science-vm"
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "allOf": [
+                          {
+                            "field": "Microsoft.Compute/imagePublisher",
+                            "equals": "batch"
+                          },
+                          {
+                            "field": "Microsoft.Compute/imageOffer",
+                            "equals": "rendering-windows2016"
+                          }
+                        ]
+                      },
+                      {
+                        "allOf": [
+                          {
+                            "field": "Microsoft.Compute/imagePublisher",
+                            "equals": "center-for-internet-security-inc"
+                          },
+                          {
+                            "field": "Microsoft.Compute/imageOffer",
+                            "like": "cis-windows-server-201*"
+                          }
+                        ]
+                      },
+                      {
+                        "allOf": [
+                          {
+                            "field": "Microsoft.Compute/imagePublisher",
+                            "equals": "pivotal"
+                          },
+                          {
+                            "field": "Microsoft.Compute/imageOffer",
+                            "like": "bosh-windows-server*"
+                          }
+                        ]
+                      },
+                      {
+                        "allOf": [
+                          {
+                            "field": "Microsoft.Compute/imagePublisher",
+                            "equals": "cloud-infrastructure-services"
+                          },
+                          {
+                            "field": "Microsoft.Compute/imageOffer",
+                            "like": "ad*"
+                          }
+                        ]
+                      },
+                      {
+                        "allOf": [
+                          {
+                            "anyOf": [
+                              {
+                                "field": "Microsoft.Compute/virtualMachines/osProfile.windowsConfiguration",
+                                "exists": "true"
+                              },
+                              {
+                                "field": "Microsoft.Compute/virtualMachines/storageProfile.osDisk.osType",
+                                "like": "Windows*"
+                              }
+                            ]
+                          },
+                          {
+                            "anyOf": [
+                              {
+                                "field": "Microsoft.Compute/imageSKU",
+                                "exists": "false"
+                              },
+                              {
+                                "allOf": [
+                                  {
+                                    "field": "Microsoft.Compute/imageSKU",
+                                    "notLike": "2008*"
+                                  },
+                                  {
+                                    "field": "Microsoft.Compute/imageOffer",
+                                    "notLike": "SQL2008*"
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "field": "Microsoft.Compute/virtualMachines/storageProfile.imageReference.id",
+                    "contains": "images/WindowsServer2019SOE"
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "value": "[[parameters('IncludeArcMachines')]",
+                    "equals": "true"
+                  },
+                  {
+                    "field": "type",
+                    "equals": "Microsoft.HybridCompute/machines"
+                  },
+                  {
+                    "field": "Microsoft.HybridCompute/imageOffer",
+                    "like": "windows*"
+                  }
+                ]
+              }
+            ]
+          },
+          "then": {
+            "effect": "auditIfNotExists",
+            "details": {
+              "type": "Microsoft.GuestConfiguration/guestConfigurationAssignments",
+              "name": "WindowsServer2019Baseline",
+              "existenceCondition": {
+                "allOf": [
+                  {
+                    "field": "Microsoft.GuestConfiguration/guestConfigurationAssignments/complianceStatus",
+                    "equals": "Compliant"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "outputs": {
+    "policyDefinitionId": {
+      "value": "[resourceId('Microsoft.Authorization/policyDefinitions',parameters('policyName'))]",
+      "type": "string"
+    }
+  }
+}
